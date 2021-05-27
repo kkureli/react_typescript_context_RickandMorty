@@ -1,26 +1,65 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { FC, useContext, useEffect } from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import { Store } from "./Store";
+import { fetchDataAction } from "./action";
+import { IAction, IEpsiode } from "./interfaces";
 
-function App() {
+const App: FC = () => {
+  const { state, dispatch } = useContext(Store);
+
+  useEffect(() => {
+    fetchDataAction()(dispatch);
+  }, []);
+
+  const toggleFavAction = (episode: IEpsiode): IAction => {
+    const episodeInFav = state.favorites.includes(episode);
+    if (episodeInFav) {
+      return dispatch({
+        type: "REMOVE_FAV",
+        payload: episode,
+      });
+    } else {
+      return dispatch({
+        type: "ADD_FAV",
+        payload: episode,
+      });
+    }
+  };
+
+  console.log(state.favorites);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <h1>Rick and Morty</h1>
+      <p>Pick your favorite episode</p>
+      <section>
+        {state.episodes &&
+          state.episodes.map((episode: IEpsiode) => {
+            return (
+              <section key={episode.id}>
+                <img src={episode.image?.medium} alt="" />
+                <div>{episode.name}</div>
+                <section>
+                  <div>
+                    Seasons: {episode.season} Number: {episode.number}
+                  </div>
+                  {state.favorites.includes(episode) ? (
+                    <button onClick={() => toggleFavAction(episode)}>
+                      Remove Fav
+                    </button>
+                  ) : (
+                    <button onClick={() => toggleFavAction(episode)}>
+                      Fav
+                    </button>
+                  )}
+                </section>
+              </section>
+            );
+          })}
+      </section>
+    </>
   );
-}
+};
 
 export default App;
